@@ -1,0 +1,9 @@
+*.sln
+*.txt
+*vcxproj*
+*.o
+*.fa
+*.asqg
+*.de
+*.fasta
+*.scaf
