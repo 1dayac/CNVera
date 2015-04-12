@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#! /bin/bash -x
 
 #Add structural variations to reference
 ./tools/SVSim/SVSim ./data/SVInput.txt ./data/DH10B-K12.fasta
