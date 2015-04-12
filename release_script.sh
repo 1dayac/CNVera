@@ -7,12 +7,12 @@
 #Please export art_illumina to paths
 art_illumina -i ./data/DH10B-K12.sim.fasta -p -f 25 -l 100 -m 300 -s 50 -qs 50 -qs2 50 -o ./data/R
 #Then for read correction start Quake
-echo -e "./data/R1.fq\n./data/R2.fq" >./data/readnames.txt
-count_qmers -f ./data/readnames.txt -k 17 -q 64
+echo -e "./data/R1.fq\n./data/R2.fq" >./readnames.txt
+cat ./data/R1.fq ./data/R2.fq | count-qmers -k 17 -q 64 >counts.txt
 #as we know coverage lets chose value like 6, because quake often fails to di it by itself
-correct -f ./data/readnames.txt -k 17 -c 6 -m readnames.txt.qcts -p 4
+correct -f ./data/readnames.txt -k 17 -c 6 -m counts.txt -p 4
 #Reads are stored in ./data/R1.cor.fq and ./data/R2.cor.fq 
-rm kmers.txt error_model* r.log readnames.txt.qcts
+rm kmers.txt error_model* r.log counts.txt
 
 #Now we start assembly with SGA
 #----------------ASSEMBLY STEP----------------------------
@@ -86,3 +86,15 @@ sga overlap -m $MOL -t $CPU ./data/reads.ec.k$CK.filter.pass.fa
 
 # Perform the contig assembly without bubble popping
 sga assemble -m $OL -g MAX_GAP_DIFF -r $R -o ./data/assemble.m$OL ./data/reads.ec.k$CK.filter.pass.asqg.gz
+#----------------ASSEMBLY STEP END----------------------------
+#----------------POST-ASSEMBLY STEP----------------------------
+CTGS=./data/assemble.m$OL-contigs.fa
+GRAPH=./data/assemble.m$OL-graph.asqg.gz
+sga-align --name lib.pe -t 8 $CTGS $IN1 $IN2
+sga-bam2de.pl -n $MIN_PAIRS --prefix libPE lib.pe.bam
+DistanceEst -s 100 --mind -99 -n 1 -k 45 -j 1 -o libPE.de libPE.hist -l 45 libPE.diffcontigs.sorted.bam
+sga-astat.py -m $MIN_LENGTH lib.pe.refsort.bam > libPE.astat
+sga scaffold -m $MIN_LENGTH --pe libPE.de -a libPE.astat -o scaffolds.n$MIN_PAIRS.scaf $CTGS
+sga scaffold2fasta -m $MIN_LENGTH -a $GRAPH -o scaffolds.n$MIN_PAIRS.fa -d $SCAFFOLD_TOLERANCE --use-overlap --write-unplaced scaffolds.n$MIN_PAIRS.scaf
+#----------------POST-ASSEMBLY STEP END----------------------------
+
