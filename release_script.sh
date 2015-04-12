@@ -58,7 +58,6 @@ sga preprocess --phred64 --pe-mode 1 -o ./preprocessed.fastq $IN1 $IN2
 # As the error corrector does not require the reverse BWT, suppress
 # construction of the reversed index
 sga index -a ropebwt -t $CPU --no-reverse preprocessed.fastq
-mv preprocessed* ./data/
 # Perform error correction with a 41-mer.
 # The k-mer cutoff parameter is learned automatically
 sga correct -k $CK --discard --learn -t $CPU -o reads.ec.k$CK.fastq preprocessed.fastq
