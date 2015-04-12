@@ -7,7 +7,7 @@
 #Please export art_illumina to paths
 art_illumina -i ./data/DH10B-K12.sim.fasta -p -f 35 -l 100 -m 300 -s 50 -qs 50 -qs2 50 -o ./data/R
 #Then for read correction start Quake
-echo -e "./data/R1.fq ./data/R2.fq" >./readnames.txt
+echo -e "./data/R1.fq ./data/R2.fq" >./data/readnames.txt
 cat ./data/R1.fq ./data/R2.fq | count-qmers -k 17 -q 64 >counts.txt
 #as we know coverage lets chose value like 6, because quake often fails to di it by itself
 correct -f ./data/readnames.txt -k 17 -c 6 -m counts.txt -p 4
