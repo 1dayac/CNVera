@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS= -std=c++11 -O3 -Wl,--stack=256000000
+CXXFLAGS= -std=c++11 -O3 -Wl
 PATHTOFILES=./src
 all:
 	$(CXX) $(CXXFLAGS) $(PATHTOFILES)/Alphabet.cpp $(PATHTOFILES)/ASQG.cpp $(PATHTOFILES)/CNVera.cpp $(PATHTOFILES)/Bigraph.cpp $(PATHTOFILES)/BitChar.cpp $(PATHTOFILES)/DNAString.cpp $(PATHTOFILES)/Edge.cpp $(PATHTOFILES)/EdgeDesc.cpp  $(PATHTOFILES)/Interval.cpp $(PATHTOFILES)/Match.cpp $(PATHTOFILES)/MultiOverlap.cpp $(PATHTOFILES)/Quality.cpp $(PATHTOFILES)/QualityVector.cpp $(PATHTOFILES)/SeqCoord.cpp $(PATHTOFILES)/SGAlgorithms.cpp $(PATHTOFILES)/SGSearch.cpp $(PATHTOFILES)/SGUtil.cpp $(PATHTOFILES)/SGWalk.cpp $(PATHTOFILES)/SGVisitors.cpp $(PATHTOFILES)/SQG.cpp $(PATHTOFILES)/Util.cpp $(PATHTOFILES)/Vertex.cpp -o CNVera
