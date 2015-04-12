@@ -1,8 +1,8 @@
 CXX=g++
 CXXFLAGS= -std=c++11 -O3 -Wl,--stack=256000000
-
+PATHTOFILES=./src
 all:
-	$(CXX) $(CXXFLAGS) Alphabet.cpp ASQG.cpp ASQG_main.cpp Bigraph.cpp BitChar.cpp DNAString.cpp doppelGraph.cpp Edge.cpp EdgeDesc.cpp  Interval.cpp Match.cpp MultiOverlap.cpp Quality.cpp QualityVector.cpp SeqCoord.cpp SGAlgorithms.cpp SGSearch.cpp SGUtil.cpp SGWalk.cpp SGVisitors.cpp SQG.cpp Util.cpp Vertex.cpp -o ASQGParser
+	$(CXX) $(CXXFLAGS) $(PATHTOFILES)/Alphabet.cpp $(PATHTOFILES)/ASQG.cpp $(PATHTOFILES)/CNVera.cpp $(PATHTOFILES)/Bigraph.cpp $(PATHTOFILES)/BitChar.cpp $(PATHTOFILES)/DNAString.cpp $(PATHTOFILES)/Edge.cpp $(PATHTOFILES)/EdgeDesc.cpp  $(PATHTOFILES)/Interval.cpp $(PATHTOFILES)/Match.cpp $(PATHTOFILES)/MultiOverlap.cpp $(PATHTOFILES)/Quality.cpp $(PATHTOFILES)/QualityVector.cpp $(PATHTOFILES)/SeqCoord.cpp $(PATHTOFILES)/SGAlgorithms.cpp $(PATHTOFILES)/SGSearch.cpp $(PATHTOFILES)/SGUtil.cpp $(PATHTOFILES)/SGWalk.cpp $(PATHTOFILES)/SGVisitors.cpp $(PATHTOFILES)/SQG.cpp $(PATHTOFILES)/Util.cpp $(PATHTOFILES)/Vertex.cpp -o CNVera
 
 Vertex.o: Vertex.cpp
 	$(CXX) $(CXXFLAGS) -c Vertex.cpp
@@ -12,4 +12,5 @@ Utils.o: Utils.cpp
 
 .PHONY: clean
 clean:
-	rm -f ASQGParser
+	rm -f CNVera
+	rm -f CNVera.exe
