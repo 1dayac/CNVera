@@ -1,3 +1,5 @@
+#!/bin/bash -x
+
 #Add structural variations to reference
 ./tools/SVSim/SVSim ./data/SVInput.txt ./data/DH10B-K12.fasta
 #First you need to do is simulate reads from reference with SV
