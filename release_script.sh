@@ -5,9 +5,9 @@
 #First you need to do is simulate reads from reference with SV
 #For this purpose we used art - http://www.niehs.nih.gov/research/resources/software/biostatistics/art/  
 #Please export art_illumina to paths
-art_illumina -i ./data/DH10B-K12.sim.fasta -p -f 25 -l 100 -m 300 -s 50 -qs 50 -qs2 50 -o ./data/R
+art_illumina -i ./data/DH10B-K12.sim.fasta -p -f 35 -l 100 -m 300 -s 50 -qs 50 -qs2 50 -o ./data/R
 #Then for read correction start Quake
-echo -e "./data/R1.fq\n./data/R2.fq" >./readnames.txt
+echo -e "./data/R1.fq ./data/R2.fq" >./readnames.txt
 cat ./data/R1.fq ./data/R2.fq | count-qmers -k 17 -q 64 >counts.txt
 #as we know coverage lets chose value like 6, because quake often fails to di it by itself
 correct -f ./data/readnames.txt -k 17 -c 6 -m counts.txt -p 4
@@ -50,46 +50,52 @@ SCAFFOLD_TOLERANCE=1
 MAX_GAP_DIFF=0.05
 
 # First, preprocess the data to remove ambiguous basecalls
-sga preprocess --phred64 --pe-mode 1 -o ./data/preprocessed.fastq $IN1 $IN2
+sga preprocess --phred64 --pe-mode 1 -o ./preprocessed.fastq $IN1 $IN2
 #
 # Error correction
 #
 # Build the index that will be used for error correction
 # As the error corrector does not require the reverse BWT, suppress
 # construction of the reversed index
-sga index -a ropebwt -t $CPU --no-reverse ./data/preprocessed.fastq
-
+sga index -a ropebwt -t $CPU --no-reverse preprocessed.fastq
+mv preprocessed* ./data/
 # Perform error correction with a 41-mer.
 # The k-mer cutoff parameter is learned automatically
-sga correct -k $CK --discard --learn -t $CPU -o ./data/reads.ec.k$CK.fastq ./data/preprocessed.fastq
+sga correct -k $CK --discard --learn -t $CPU -o reads.ec.k$CK.fastq preprocessed.fastq
 
 #
-# Contig assembly
+# Contig assembly	
 #
 # Index the corrected data.
-sga index -a ropebwt -t $CPU ./data/reads.ec.k$CK.fastq
+sga index -a ropebwt -t $CPU reads.ec.k$CK.fastq
 
 # Remove exact-match duplicates and reads with low-frequency k-mers
-sga filter -x $COV_FILTER -t $CPU --homopolymer-check --low-complexity-check ./data/reads.ec.k$CK.filter.pass.fa
+sga filter -x $COV_FILTER -t $CPU --homopolymer-check --low-complexity-check reads.ec.k$CK.fastq
 
 # Merge simple, unbranched chains of vertices
-sga fm-merge -m $MOL -t $CPU -o ./data/merged.k$CK.fa ./data/reads.ec.k$CK.filter.pass.fa
+sga fm-merge -m $MOL -t $CPU -o merged.k$CK.fa reads.ec.k$CK.filter.pass.fa
 
 # Build an index of the merged sequences
-sga index -d 1000000 -t $CPU ./data/merged.k$CK.fa
+sga index -d 1000000 -t $CPU merged.k$CK.fa
 
 # Remove any substrings that were generated from the merge process
-sga rmdup -t $CPU ./data/merged.k$CK.fa
+sga rmdup -t $CPU merged.k$CK.fa
 
 # Compute the structure of the string graph
-sga overlap -m $MOL -t $CPU ./data/reads.ec.k$CK.filter.pass.fa
+sga overlap -m $MOL -t $CPU reads.ec.k$CK.filter.pass.fa
 
 # Perform the contig assembly without bubble popping
-sga assemble -m $OL -g MAX_GAP_DIFF -r $R -o ./data/assemble.m$OL ./data/reads.ec.k$CK.filter.pass.asqg.gz
+sga assemble -m $OL -g MAX_GAP_DIFF -r $R -o assemble.m$OL reads.ec.k$CK.filter.pass.asqg.gz
+mv merged* ./data/
+mv reads* ./data/
+mv preprocessed* ./data/
+mv dotGraph.dot ./data/
+mv error* ./data/
+
 #----------------ASSEMBLY STEP END----------------------------
 #----------------POST-ASSEMBLY STEP----------------------------
-CTGS=./data/assemble.m$OL-contigs.fa
-GRAPH=./data/assemble.m$OL-graph.asqg.gz
+CTGS=assemble.m$OL-contigs.fa
+GRAPH=assemble.m$OL-graph.asqg.gz
 sga-align --name lib.pe -t 8 $CTGS $IN1 $IN2
 sga-bam2de.pl -n $MIN_PAIRS --prefix libPE lib.pe.bam
 DistanceEst -s 100 --mind -99 -n 1 -k 45 -j 1 -o libPE.de libPE.hist -l 45 libPE.diffcontigs.sorted.bam
