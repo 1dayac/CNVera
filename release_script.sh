@@ -46,3 +46,41 @@ MIN_LENGTH=100
 SCAFFOLD_TOLERANCE=1
 # Turn off collapsing bubbles around indels
 MAX_GAP_DIFF=0.05
+
+# First, preprocess the data to remove ambiguous basecalls
+sga preprocess --phred64 --pe-mode 1 -o ./data/preprocessed.fastq $IN1 $IN2
+#
+# Error correction
+#
+# Build the index that will be used for error correction
+# As the error corrector does not require the reverse BWT, suppress
+# construction of the reversed index
+sga index -a ropebwt -t $CPU --no-reverse ./data/preprocessed.fastq
+
+# Perform error correction with a 41-mer.
+# The k-mer cutoff parameter is learned automatically
+sga correct -k $CK --discard --learn -t $CPU -o ./data/reads.ec.k$CK.fastq ./data/preprocessed.fastq
+
+#
+# Contig assembly
+#
+# Index the corrected data.
+sga index -a ropebwt -t $CPU ./data/reads.ec.k$CK.fastq
+
+# Remove exact-match duplicates and reads with low-frequency k-mers
+sga filter -x $COV_FILTER -t $CPU --homopolymer-check --low-complexity-check ./data/reads.ec.k$CK.filter.pass.fa
+
+# Merge simple, unbranched chains of vertices
+sga fm-merge -m $MOL -t $CPU -o ./data/merged.k$CK.fa ./data/reads.ec.k$CK.filter.pass.fa
+
+# Build an index of the merged sequences
+sga index -d 1000000 -t $CPU ./data/merged.k$CK.fa
+
+# Remove any substrings that were generated from the merge process
+sga rmdup -t $CPU ./data/merged.k$CK.fa
+
+# Compute the structure of the string graph
+sga overlap -m $MOL -t $CPU ./data/reads.ec.k$CK.filter.pass.fa
+
+# Perform the contig assembly without bubble popping
+sga assemble -m $OL -g MAX_GAP_DIFF -r $R -o ./data/assemble.m$OL ./data/reads.ec.k$CK.filter.pass.asqg.gz
