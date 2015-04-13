@@ -85,11 +85,7 @@ sga overlap -m $MOL -t $CPU reads.ec.k$CK.filter.pass.fa
 
 # Perform the contig assembly without bubble popping
 sga assemble -m $OL -g MAX_GAP_DIFF -r $R -o assemble.m$OL reads.ec.k$CK.filter.pass.asqg.gz
-mv merged* ./data/
-mv reads* ./data/
-mv preprocessed* ./data/
-mv dotGraph.dot ./data/
-mv error* ./data/
+
 
 #----------------ASSEMBLY STEP END----------------------------
 #----------------POST-ASSEMBLY STEP----------------------------
@@ -103,3 +99,16 @@ sga scaffold -m $MIN_LENGTH --pe libPE.de -a libPE.astat -o scaffolds.n$MIN_PAIR
 sga scaffold2fasta -m $MIN_LENGTH -a $GRAPH -o scaffolds.n$MIN_PAIRS.fa -d $SCAFFOLD_TOLERANCE --use-overlap --write-unplaced scaffolds.n$MIN_PAIRS.scaf
 #----------------POST-ASSEMBLY STEP END----------------------------
 
+#----------------RUN MAGNOLIA STEP----------------------------
+#A bit tricky. First we need to align reads to contigs and transform them to .ace format
+KAligner -m -j 8 --seq -k 61 preprocessed.fastq $CTGS > KAlign.out
+perl $PATHTOABYSSTOACE/abyss2ace preprocessed.fastq $CTGS KAlign.out >abyss.ace
+#This script was altered to put all reads into one group, without regexp settings
+#Also additional corrections were done (output for last contig was always missing)
+python ./tools/ace2magnolia.py -a abyss.ace -r "0;C;c" -t abyss -o counts.txt
+
+mv merged* ./data/
+mv reads* ./data/
+mv preprocessed* ./data/
+mv dotGraph.dot ./data/
+mv error* ./data/
