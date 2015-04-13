@@ -83,7 +83,7 @@ for i in answer.keys():
             difference_first += abs(answer[i] - first_solution[i])
             f1.write(i + " " + str(answer[i] - first_solution[i]) + "\n")
 
-f3.write("Summary for Magnolia")
+f3.write("Summary for Magnolia" + "\n")
 f3.write("Total difference " + str(difference_first) + "\n")
 f3.write("Total difference short <250bp " + str(difference_first_short) + "\n")
 f3.write("True short <250bp " + str(true_first_short) + "\n")
@@ -97,7 +97,7 @@ f3.write("True long >1000bp " + str(true_first_long) + "\n")
 
 
 f2 = open("difference_CNVera.txt", 'w')
-f3.write("=============================")
+f3.write("=============================" + "\n")
 
 difference_second = 0
 difference_second_short = 0
@@ -130,20 +130,20 @@ for i in answer.keys():
             difference_second += abs(answer[i] - second_solution[i])
             f2.write(i + " " + str(answer[i] - second_solution[i]) + "\n")
 
-f3.write("Summary for CNVera")
-f2.write("Total difference " + str(difference_second) + "\n")
-f2.write("Total difference short <250bp " + str(difference_second_short) + "\n")
-f2.write("True short <250bp " + str(true_second_short) + "\n")
+f3.write("Summary for CNVera" + "\n")
+f3.write("Total difference " + str(difference_second) + "\n")
+f3.write("Total difference short <250bp " + str(difference_second_short) + "\n")
+f3.write("True short <250bp " + str(true_second_short) + "\n")
 
-f2.write("Total difference medium 250-1000bp " + str(difference_second_medium) + "\n")
-f2.write("True medium 250-1000bp " + str(true_second_medium) + "\n")
+f3.write("Total difference medium 250-1000bp " + str(difference_second_medium) + "\n")
+f3.write("True medium 250-1000bp " + str(true_second_medium) + "\n")
 
-f2.write("Total difference long >1000 bp " + str(difference_second_long) + "\n")
-f2.write("True long >1000bp " + str(true_second_long) + "\n")
+f3.write("Total difference long >1000 bp " + str(difference_second_long) + "\n")
+f3.write("True long >1000bp " + str(true_second_long) + "\n")
 f3.write("==============================")
 
-f3.write("Total summary")
-f2.write("Total short - " + str(len(lengthes_short)) + "\n")
-f2.write("Total medium - " + str(len(lengthes_medium)) + "\n")
-f2.write("Total long -  " + str(len(lengthes_long)) + "\n")
+f3.write("Total summary" + "\n")
+f3.write("Total short - " + str(len(lengthes_short)) + "\n")
+f3.write("Total medium - " + str(len(lengthes_medium)) + "\n")
+f3.write("Total long -  " + str(len(lengthes_long)) + "\n")
 
