@@ -108,7 +108,7 @@ perl ./tools/abyss2ace preprocessed.fastq $CTGS KAlign.out >abyss.ace
 python ./tools/ace2magnolia.py -a abyss.ace -r "0;C;c" -t abyss -o counts.txt
 #counts file accidentally wrong - lengths of contigs are missing. We have to fix it
 python ./tools/addLengths.py counts.txt $CTGS new_counts.txt
-python ~/tools/magnolia.py -i new_counts.txt -s 500 -S 0 -r 200 -m 15
+python ./tools/magnolia.py -i new_counts.txt -s 500 -S 0 -r 200 -m 15
 #Now magnolia results are in copynumbers.txt
 #----------------RUN MAGNOLIA STEP END----------------------------
 #----------------RUN CNVera STEP----------------------------
