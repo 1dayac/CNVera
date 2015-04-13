@@ -131,3 +131,18 @@ mv reads* ./data/
 mv preprocessed* ./data/
 mv dotGraph.dot ./data/
 mv error* ./data/
+mv lib* ./data/
+mv assemble* ./data/
+mv abyss.ace ./data/
+mv results.txt ./data/
+mv counts.txt ./data/
+mv coverage.out ./data/
+mv temp* ./data/
+mv *scaf ./data/
+rm readnames.txt
+rm scaffolds*
+rm logs.txt
+rm model.txt
+mv new_counts.txt ./data/
+mv KAlign.out ./data/
+rm new_contigs.fasta
