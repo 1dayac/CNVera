@@ -102,10 +102,14 @@ sga scaffold2fasta -m $MIN_LENGTH -a $GRAPH -o scaffolds.n$MIN_PAIRS.fa -d $SCAF
 #----------------RUN MAGNOLIA STEP----------------------------
 #A bit tricky. First we need to align reads to contigs and transform them to .ace format
 KAligner -m -j 8 --seq -k 61 preprocessed.fastq $CTGS > KAlign.out
-perl $PATHTOABYSSTOACE/abyss2ace preprocessed.fastq $CTGS KAlign.out >abyss.ace
+perl ./tools/abyss2ace preprocessed.fastq $CTGS KAlign.out >abyss.ace
 #This script was altered to put all reads into one group, without regexp settings
 #Also additional corrections were done (output for last contig was always missing)
 python ./tools/ace2magnolia.py -a abyss.ace -r "0;C;c" -t abyss -o counts.txt
+#counts file accidentally wrong - lengths of contigs are missing. We have to fix it
+python ./tools/addLengths.py counts.txt $CTGS new_counts.txt
+python ~/tools/magnolia.py -i new_counts.txt -s 500 -S 0 -r 200 -m 15
+#Now magnolia results are in copynumbers.txt
 
 mv merged* ./data/
 mv reads* ./data/
