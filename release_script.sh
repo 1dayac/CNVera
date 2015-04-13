@@ -110,6 +110,21 @@ python ./tools/ace2magnolia.py -a abyss.ace -r "0;C;c" -t abyss -o counts.txt
 python ./tools/addLengths.py counts.txt $CTGS new_counts.txt
 python ~/tools/magnolia.py -i new_counts.txt -s 500 -S 0 -r 200 -m 15
 #Now magnolia results are in copynumbers.txt
+#----------------RUN MAGNOLIA STEP END----------------------------
+#----------------RUN CNVera STEP----------------------------
+gunzip $GRAPH
+GRAPH=assemble.m$OL-graph.asqg
+./CNVera $GRAPH copynumbers.txt libPE.de scaffolds.n$MIN_PAIRS.scaf ./data/DH10B-K12.fasta $CTGS
+#Now CNVera results are in new_copynumbers.txt
+#----------------RUN CNVera STEP END----------------------------
+#----------------RUN VALIDATION STEP----------------------------
+#Align contigs to target genome
+makeblastdb -dbtype nucl -in ./data/DH10B-K12.sim.fasta
+blastn -db ./data/DH10B-K12.sim.fasta -query $CTGS -outfmt 6 -dust yes -word_size 80 -evalue 10 -perc_identity 95 -out results.txt
+python ./tools/solutionComparer.py copynumbers.txt new_copynumbers.txt results.txt
+#Now we have results in summary.txt and results for each contig in difference_magnolia.txt and difference_CNVera.txt 
+#----------------RUN VALIDATION STEP END----------------------------
+#----------------SCOOP UP----------------------------
 
 mv merged* ./data/
 mv reads* ./data/
