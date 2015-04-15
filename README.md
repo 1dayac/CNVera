@@ -21,8 +21,7 @@ Building and running examples
 
 2. To test Magnolia vs CNVera performance on E.coli dataset. use:
 
-				./release_script.sh
-
+        ./release_script.sh
 
 Full manual will be added further
 
