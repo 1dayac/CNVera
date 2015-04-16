@@ -1,7 +1,7 @@
 CNVera
 ========
  
-CNVera - tool for contig copy number estimation
+CNVera - tool for contig copy number estimation based on SGA source code
 
 CNVera could be compiled with GCC 8.2.
 
