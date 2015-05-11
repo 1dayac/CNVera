@@ -586,8 +586,20 @@ int main_work(int argc, char* argv[])
   return 0;
 }
 
+void Usage()
+{
+  std::cerr << "Usage:" << std::endl;
+  std::cerr << "./CNVera <file with graph in ASQG format> <File with initial copynumbers> <de-file from SGA> <scaf-file from SGA> <file with reference> <file with contigs>" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
+  if (argc != 7)
+  {
+    Usage();
+    return 0;
+  }
   main_work(argc, argv);
+  return 0;
 }
 
