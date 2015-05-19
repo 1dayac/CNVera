@@ -10,6 +10,7 @@
 #include <queue>
 #include <functional>
 
+
 int VERBOSE = 0;
 
 void logVerbose(std::string message)
@@ -123,7 +124,7 @@ std::vector<StringVector> parseScaffoldFile(std::ifstream& inScaf)
     StringVector a = split(temp, '\t');
     StringVector res;
 
-    for (int i = 0; i < a.size(); ++i)
+     for (int i = 0; i < a.size(); ++i)
     {
       res.push_back(split(a[i], ',')[0]);
     }
@@ -470,7 +471,54 @@ void mappathsToGraph(StringGraph * graph, blastVector& blastVector)
   }
 }
 
+//
 
+std::unordered_map<std::string, SGWalkVector> getAllPathsWithVertex(SGWalkVector& paths)
+{
+	std::unordered_map<std::string, SGWalkVector> vertexPathMap;
+	for (auto it : paths)
+	{
+		for (auto it2 : it.getVertices())
+		{
+			vertexPathMap[it2->getID()].push_back(it);
+		}
+	}
+	return vertexPathMap;
+}
+
+
+
+std::pair<SGWalkVector, SGWalkVector> getPathsSplittedByVertex(SGWalkVector& paths, Vertex* v)
+{
+	std::pair<SGWalkVector, SGWalkVector> pathsSplittedByVertex;
+	int index;
+	for (auto it : paths)
+	{
+		if (!it.containsVertex(v->getID()))
+			continue;
+		index = it.getVertexIndex(v->getID());
+		EdgePtrVec edges = it.getEdgeIndex();
+		EdgePtrVec edges1(edges.begin(), edges.begin()+index);
+		EdgePtrVec edges2(edges.begin() + index, edges.end());
+		SGWalk path1(edges1, false);
+		SGWalk path2(edges2, false);
+		pathsSplittedByVertex.first.push_back(path1);
+		pathsSplittedByVertex.second.push_back(path2);
+	}
+	return pathsSplittedByVertex;
+}
+
+
+
+int EstimateByNeighbours(Vertex* ID)
+{
+	int cn;
+
+
+	return cn;
+}
+
+//
 
 int main_work(int argc, char* argv[])
 {

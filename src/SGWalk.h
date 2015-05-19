@@ -51,6 +51,7 @@ class SGWalk
         VertexPtrVec getVertices() const;
         Vertex* getStartVertex() const;
         Vertex* getLastVertex() const;
+		int getVertexIndex(const VertexID& id);
 
         // Returns a vector of EdgeComps of the orientation of each
         // vertex in the path with respect to the start of the walk

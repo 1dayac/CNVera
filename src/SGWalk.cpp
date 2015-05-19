@@ -144,7 +144,23 @@ bool SGWalk::containsVertex(const VertexID& id) const
 }
 
 //
-void SGWalk::truncate(const VertexID& id)
+
+int SGWalk::getVertexIndex(const VertexID& id)
+{
+	EdgePtrVec::iterator iter = m_edges.begin();
+	int index = 0;
+	while (iter != m_edges.end())
+	{
+		++index;
+		if ((*iter)->getEndID() == id)
+			break;
+		++iter;
+	}
+	return index;
+}
+
+//
+void SGWalk::truncate(const VertexID& id)//обрезать путь по вершинке
 {
     EdgePtrVec::iterator iter = m_edges.begin();
     while(iter != m_edges.end())
