@@ -452,7 +452,6 @@ SGWalkVector removeContained(SGWalkVector& superWalks)
 //Remove uncontained paths and then call split extend algorithm
 int uncontainedpaths_SGA(Vertex* startID, ScafVector& scaffolds, bool isForward, StringGraph* graph)
 {
-  int answer = 0;
   SGWalkVector superWalks;
   for (int i = 0; i < scaffolds.size(); ++i)
   {
