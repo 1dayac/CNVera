@@ -407,6 +407,7 @@ Contained isContained(SGWalk walk1, SGWalk walk2)
 
 std::unordered_map<std::string, int> CNbyNeighbours;
 
+SGWalkVector allVertexPathsVector;
 
 //Remove uncontained paths and then call split extend algorithm
 int uncontainedpaths_SGA(Vertex* startID, ScafVector& scaffolds, bool isForward, StringGraph* graph)
@@ -517,7 +518,10 @@ int uncontainedpaths_SGA(Vertex* startID, ScafVector& scaffolds, bool isForward,
 
   int res = extendpaths(allpaths, isForward);
   logVerbose("Number of paths after extension step - " + std::to_string(res));
-
+  for (auto it : allpaths)
+  {
+	  allVertexPathsVector.push_back(it);
+  }
   return res;
 }
 
@@ -594,11 +598,15 @@ std::pair<SGWalkVector, SGWalkVector> getPathsSplittedByVertex(SGWalkVector& pat
 
 
 
-int EstimateByNeighbours(Vertex* ID)
+int EstimateByNeighbours(Vertex* v)
 {
 	int cn;
-
-
+	std::unordered_map<std::string, SGWalkVector> allPathsWithVertexMap;
+	SGWalkVector allPathsWithVertex;
+	std::pair<SGWalkVector, SGWalkVector> PathsSplittedByVertex;
+	allPathsWithVertexMap=getAllPathsWithVertex(allVertexPathsVector);
+	allPathsWithVertex = allPathsWithVertexMap[v->getID()];
+	PathsSplittedByVertex = getPathsSplittedByVertex(allPathsWithVertex, v);
 	return cn;
 }
 
@@ -704,10 +712,10 @@ int main_work(int argc, char* argv[])
       continue;
     }
 
-    if (!d->getEstimatedWithPairedReads() && d->getEstimatedCN() < CNbyNeighbours[d->getID()])
+	if (!d->getEstimatedWithPairedReads() && d->getEstimatedCN() < EstimateByNeighbours(d))
     {
-      logVerbose(d->getID() + " is changed on " + std::to_string(CNbyNeighbours[d->getID()]) + " by neighbours");
-      d->setEstimatedCN(CNbyNeighbours[d->getID()]);
+		logVerbose(d->getID() + " is changed on " + std::to_string(EstimateByNeighbours(d)) + " by neighbours");
+	  d->setEstimatedCN(EstimateByNeighbours(d));
     }
   }
 
