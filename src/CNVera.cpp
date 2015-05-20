@@ -584,17 +584,32 @@ std::pair<SGWalkVector, SGWalkVector> getPathsSplittedByVertex(SGWalkVector& pat
 	return pathsSplittedByVertex;
 }
 
-
+void reversePaths(SGWalkVector& paths)
+{
+	for (auto it : paths)
+	{
+		EdgePtrVec temp=it.getEdgeIndex();
+		std::reverse(temp.begin(), temp.end());
+		for (auto it2 : temp)
+		{
+			it2 = it2->getTwin();
+		}
+		it = SGWalk(temp);
+	}
+}
 
 int EstimateByNeighbours(Vertex* v)
 {
-	int cn;
 	std::unordered_map<std::string, SGWalkVector> allPathsWithVertexMap;
 	SGWalkVector allPathsWithVertex;
-	std::pair<SGWalkVector, SGWalkVector> PathsSplittedByVertex;
+	std::pair<SGWalkVector, SGWalkVector> pathsSplittedByVertex;
 	allPathsWithVertexMap=getAllPathsWithVertex(allVertexPathsVector);
 	allPathsWithVertex = allPathsWithVertexMap[v->getID()];
-	PathsSplittedByVertex = getPathsSplittedByVertex(allPathsWithVertex, v);
+	pathsSplittedByVertex = getPathsSplittedByVertex(allPathsWithVertex, v);
+	SGWalkVector pathsSplittedByVertexWithout2=removeContained(pathsSplittedByVertex.second);
+	reversePaths(pathsSplittedByVertex.first);
+	SGWalkVector pathsSplittedByVertexWithout1=removeContained(pathsSplittedByVertex.first);
+	int cn=std::max(extendpaths(pathsSplittedByVertexWithout1, false),	extendpaths(pathsSplittedByVertexWithout2, true));
 	return cn;
 }
 
