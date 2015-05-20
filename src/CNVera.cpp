@@ -409,6 +409,41 @@ std::unordered_map<std::string, int> CNbyNeighbours;
 
 SGWalkVector allVertexPathsVector;
 
+SGWalkVector removeContained(SGWalkVector& superWalks)
+{
+  SGWalkVector allPaths;
+  std::vector<bool> checked(superWalks.size());
+  for (int i = 0; i < superWalks.size(); ++i)
+  {
+
+    for (int j = i + 1; j < superWalks.size(); ++j)
+    {
+      if (checked[i] || checked[j])
+        continue;
+      switch (isContained(superWalks[i], superWalks[j]))
+      {
+      case NONE:
+        break;
+      case FIRSTINSECOND:
+        checked[i] = true;
+        break;
+      case SECONDINFIRST:
+        checked[j] = true;
+        break;
+      }
+    }
+  }
+
+  for (size_t i = 0; i < superWalks.size(); ++i)
+  {
+    if (!checked[i])
+    {
+      allPaths.push_back(superWalks[i]);
+    }
+  }
+  return allPaths;
+}
+
 //Remove uncontained paths and then call split extend algorithm
 int uncontainedpaths_SGA(Vertex* startID, ScafVector& scaffolds, bool isForward, StringGraph* graph)
 {
@@ -462,59 +497,12 @@ int uncontainedpaths_SGA(Vertex* startID, ScafVector& scaffolds, bool isForward,
     }
   }
 
-  std::vector<bool> checked(superWalks.size());
-  for (int i = 0; i < superWalks.size(); ++i)
-  {
 
-    for (int j = i + 1; j < superWalks.size(); ++j)
-    {
-      if (checked[i] || checked[j])
-        continue;
-      switch (isContained(superWalks[i], superWalks[j]))
-      {
-        case NONE:
-          break;
-        case FIRSTINSECOND:
-          checked[i] = true;
-          break;
-        case SECONDINFIRST:
-          checked[j] = true;
-          break;
-      }
-    }
-  }
-
-  std::unordered_map<std::string, int> CNByNeighboursTemp;
-  for (size_t i = 0; i < superWalks.size(); ++i)
-  {
-    if (!checked[i])
-    {
-      for (size_t j = 0; j < superWalks[i].getVertices().size(); ++j)
-      {
-        CNByNeighboursTemp[superWalks[i].getVertices()[j]->getID()]++;
-      }
-    }
-  }
+  SGWalkVector allpaths = removeContained(superWalks);
 
 
-  SGWalkVector allpaths;
+  logVerbose("Total number of uncontained paths - " + std::to_string(allpaths.size()));
 
-  for (size_t i = 0; i < superWalks.size(); ++i)
-  {
-    if (!checked[i])
-    {
-      answer++;
-      allpaths.push_back(superWalks[i]);
-    }
-  }
-
-  logVerbose("Total number of uncontained paths - " + std::to_string(answer));
-
-  for (auto d : CNByNeighboursTemp)
-  {
-    if (d.second > CNbyNeighbours[d.first])
-      CNbyNeighbours[d.first] = d.second;
-  }
 
   int res = extendpaths(allpaths, isForward);
   logVerbose("Number of paths after extension step - " + std::to_string(res));
