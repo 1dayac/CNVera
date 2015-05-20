@@ -218,6 +218,75 @@ void parseBlastFile(blastVector& blastMap, StringGraph* graph)
 }
 
 //If pathToFind is contained in path, with start in pNode
+bool comparepaths(VertexPtrVec pathToFind, pathNode* pNode, bool isForward, SGWalk& resultingPath)
+{
+  auto currentNode = pNode;
+  if ((isForward && pNode->realForward == FORWARD) || (!isForward && pNode->realForward == REVERSE))
+  {
+    for (int i = 0; i < pathToFind.size(); ++i)
+    {
+      if (currentNode->current == pathToFind[i])
+      {
+        if (currentNode->forward != 0)
+          currentNode = currentNode->forward;
+        else
+        {
+          if (i != pathToFind.size() - 1)
+            break;
+        }
+      }
+      else
+      {
+        break;
+      }
+      if (i == pathToFind.size() - 1)
+      {
+        while (currentNode->forward != 0)
+        {
+          Edge * findEdgeTo = currentNode->current->findEdgesTo(currentNode->forward->current->getID())[0];
+          currentNode = currentNode->forward;
+          resultingPath.addEdge(findEdgeTo);
+        }
+        return true;
+      }
+    }
+  }
+  else
+  if ((!isForward && pNode->realReverse == REVERSE) || (isForward && pNode->realReverse == FORWARD))
+  {
+    for (int i = 0; i < pathToFind.size(); ++i)
+    {
+      if (currentNode->current == pathToFind[i])
+      {
+        if (currentNode->reverse != 0)
+          currentNode = currentNode->reverse;
+        else
+        {
+          if (i != pathToFind.size() - 1)
+            break;
+        }
+      }
+      else
+      {
+        break;
+      }
+      if (i == pathToFind.size() - 1)
+      {
+        while (currentNode->reverse != 0)
+        {
+          Edge * findEdgeTo = currentNode->current->findEdgesTo(currentNode->reverse->current->getID())[0];
+          currentNode = currentNode->reverse;
+          resultingPath.addEdge(findEdgeTo);
+        }
+
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+//If pathToFind is contained in path, with start in pNode
 bool comparepaths(VertexPtrVec pathToFind, pathNode* pNode, bool isForward)
 {
   auto currentNode = pNode;
@@ -241,6 +310,7 @@ bool comparepaths(VertexPtrVec pathToFind, pathNode* pNode, bool isForward)
       }
       if (i == pathToFind.size() - 1)
       {
+
         return true;
       }
     }
@@ -276,23 +346,36 @@ bool comparepaths(VertexPtrVec pathToFind, pathNode* pNode, bool isForward)
 
 int extendpaths(SGWalkVector& allpaths, bool isForward)
 {
+  SGWalkVector extendedPaths;
   int totalPathSize = 0;
   for (int i = 0; i < allpaths.size(); ++i)
   {
-
     auto path = allpaths[i];
     auto vertexSeq = path.getVertices();
     auto firstVertex = vertexSeq[0];
     int currpathsSize = 0;
+
+    bool wasTrue = false;
     for (auto d : firstVertex->getPaths())
     {
-      if (comparepaths(vertexSeq, d, isForward))
+      SGWalk resultingPath(path);
+
+      if (comparepaths(vertexSeq, d, isForward, resultingPath))
       {
         currpathsSize++;
+        extendedPaths.push_back(resultingPath);
+        wasTrue = true;
       }
     }
+    if (!wasTrue)
+    {
+      extendedPaths.push_back(path);
+    }
+    
+    
     totalPathSize += std::max(1, currpathsSize);
   }
+  allpaths = extendedPaths;
   return totalPathSize;
 }
 
@@ -351,6 +434,7 @@ int uncontainedpaths_SGA(Vertex* startID, ScafVector& scaffolds, bool isForward,
         {
           for (auto d : startID->getPaths())
           {
+
             if (comparepaths(outWalks[j].getVertices(), d, isForward))
             {
               setOfContenders.push_back(outWalks[j]);
