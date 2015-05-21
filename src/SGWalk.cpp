@@ -135,11 +135,21 @@ bool SGWalk::isIndexed() const
     return m_pWalkIndex != NULL;
 }
 
-//
-bool SGWalk::containsVertex(const VertexID& id) const
+void SGWalk::indexWalk()
 {
-    if(m_pWalkIndex == NULL)
-        assert(false);
+	m_pWalkIndex = new WalkIndex();
+	
+	auto temp=this->getVertices();
+	for (auto it : temp)
+	{
+		m_pWalkIndex->insert(it->getID());
+	}
+}
+//
+bool SGWalk::containsVertex(const VertexID& id)
+{
+    if(!isIndexed())
+        indexWalk();
     return m_pWalkIndex->count(id) > 0;
 }
 

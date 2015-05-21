@@ -244,7 +244,10 @@ bool comparepaths(VertexPtrVec pathToFind, pathNode* pNode, bool isForward, SGWa
       {
         while (currentNode->forward != 0)
         {
-          Edge * findEdgeTo = currentNode->current->findEdgesTo(currentNode->forward->current->getID())[0];
+          if (currentNode->current->findEdgesTo(currentNode->forward->current->getID()).size() == 0)
+			break;
+
+		  Edge * findEdgeTo = currentNode->current->findEdgesTo(currentNode->forward->current->getID())[0];
           currentNode = currentNode->forward;
           resultingPath.addEdge(findEdgeTo);
         }
@@ -275,6 +278,8 @@ bool comparepaths(VertexPtrVec pathToFind, pathNode* pNode, bool isForward, SGWa
       {
         while (currentNode->reverse != 0)
         {
+			if (currentNode->current->findEdgesTo(currentNode->reverse->current->getID()).size() == 0)
+				break;
           Edge * findEdgeTo = currentNode->current->findEdgesTo(currentNode->reverse->current->getID())[0];
           currentNode = currentNode->reverse;
           resultingPath.addEdge(findEdgeTo);
@@ -576,10 +581,16 @@ std::pair<SGWalkVector, SGWalkVector> getPathsSplittedByVertex(SGWalkVector& pat
 		EdgePtrVec edges = it.getEdgeIndex();
 		EdgePtrVec edges1(edges.begin(), edges.begin()+index);
 		EdgePtrVec edges2(edges.begin() + index, edges.end());
-		SGWalk path1(edges1, false);
-		SGWalk path2(edges2, false);
-		pathsSplittedByVertex.first.push_back(path1);
-		pathsSplittedByVertex.second.push_back(path2);
+		if (edges1.size() != 0)
+		{
+			SGWalk path1(edges1);
+			pathsSplittedByVertex.first.push_back(path1);
+		}
+		if (edges2.size() != 0)
+		{
+			SGWalk path2(edges2);
+			pathsSplittedByVertex.second.push_back(path2);
+		}
 	}
 	return pathsSplittedByVertex;
 }
@@ -600,6 +611,7 @@ void reversePaths(SGWalkVector& paths)
 
 int EstimateByNeighbours(Vertex* v)
 {
+	std::cout << v->getID() << " is processed by neighbours";
 	std::unordered_map<std::string, SGWalkVector> allPathsWithVertexMap;
 	SGWalkVector allPathsWithVertex;
 	std::pair<SGWalkVector, SGWalkVector> pathsSplittedByVertex;
@@ -630,7 +642,7 @@ int main_work(int argc, char* argv[])
   std::string contigsFilename = argv[6];
   std::string makeblastdbCommand = "$SHELL -c 'makeblastdb -dbtype nucl -in " + referenceFilename + " -out tempDatabase'";
   //make blast database for reference
-  int excode = system(makeblastdbCommand.c_str());
+  /*int excode = system(makeblastdbCommand.c_str());
   std::string blastContigsCommand = "$SHELL -c 'blastn -db tempDatabase -query " + contigsFilename + " -outfmt 6 -dust yes -word_size 80 -evalue 10 -perc_identity 95 -out results.txt'";
   system(blastContigsCommand.c_str());
 
@@ -639,7 +651,7 @@ int main_work(int argc, char* argv[])
     std::cerr << "Error making blast db" << std::endl;
     return 1;
   }
-
+*/
   //contruct adjacency lists
   StringGraph* graph = SGUtil::loadASQG(filename, 0);
   blastVector blastOfAllContigs;
@@ -717,7 +729,7 @@ int main_work(int argc, char* argv[])
 
 	if (!d->getEstimatedWithPairedReads() && d->getEstimatedCN() < EstimateByNeighbours(d))
     {
-		logVerbose(d->getID() + " is changed on " + std::to_string(EstimateByNeighbours(d)) + " by neighbours");
+	  logVerbose(d->getID() + " is changed on " + std::to_string(EstimateByNeighbours(d)) + " by neighbours");
 	  d->setEstimatedCN(EstimateByNeighbours(d));
     }
   }

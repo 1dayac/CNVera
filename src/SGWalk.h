@@ -35,10 +35,10 @@ class SGWalk
 {
     public:
         
-        SGWalk(Vertex* pStartVertex, bool bIndexWalk = false);
+        SGWalk(Vertex* pStartVertex, bool bIndexWalk = true);
         SGWalk(const SGWalk& other);
-        SGWalk(const EdgePtrVec& edgeVec, bool bIndexWalk = false);
-
+        SGWalk(const EdgePtrVec& edgeVec, bool bIndexWalk = true);
+		void indexWalk();
         ~SGWalk();
 
         SGWalk& operator=(const SGWalk& other);
@@ -68,7 +68,7 @@ class SGWalk
         // Returns true if the walk contains the specified vertex
         // If the walk is not indexed, this will assert
         bool isIndexed() const;
-        bool containsVertex(const VertexID& id) const;
+        bool containsVertex(const VertexID& id);
 
         // Truncate the walk after the first instance of id
         void truncate(const VertexID& id);
