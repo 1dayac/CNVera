@@ -159,6 +159,8 @@ int SGWalk::getVertexIndex(const VertexID& id)
 {
 	EdgePtrVec::iterator iter = m_edges.begin();
 	int index = 0;
+  if (this->m_pStartVertex->getID() == id)
+    return 0;
 	while (iter != m_edges.end())
 	{
 		++index;

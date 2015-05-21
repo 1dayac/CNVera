@@ -242,12 +242,13 @@ bool comparepaths(VertexPtrVec pathToFind, pathNode* pNode, bool isForward, SGWa
       }
       if (i == pathToFind.size() - 1)
       {
+        currentNode = currentNode->reverse;
         while (currentNode->forward != 0)
         {
           if (currentNode->current->findEdgesTo(currentNode->forward->current->getID()).size() == 0)
-			break;
+			      break;
 
-		  Edge * findEdgeTo = currentNode->current->findEdgesTo(currentNode->forward->current->getID())[0];
+		      Edge * findEdgeTo = currentNode->current->findEdgesTo(currentNode->forward->current->getID())[0];
           currentNode = currentNode->forward;
           resultingPath.addEdge(findEdgeTo);
         }
@@ -276,10 +277,12 @@ bool comparepaths(VertexPtrVec pathToFind, pathNode* pNode, bool isForward, SGWa
       }
       if (i == pathToFind.size() - 1)
       {
+        currentNode = currentNode->forward;
         while (currentNode->reverse != 0)
         {
-			if (currentNode->current->findEdgesTo(currentNode->reverse->current->getID()).size() == 0)
-				break;
+          
+	  	  	if (currentNode->current->findEdgesTo(currentNode->reverse->current->getID()).size() == 0)
+		    		break;
           Edge * findEdgeTo = currentNode->current->findEdgesTo(currentNode->reverse->current->getID())[0];
           currentNode = currentNode->reverse;
           resultingPath.addEdge(findEdgeTo);
@@ -507,13 +510,13 @@ int uncontainedpaths_SGA(Vertex* startID, ScafVector& scaffolds, bool isForward,
 
   logVerbose("Total number of uncontained paths - " + std::to_string(allpaths.size()));
 
+  for (auto it : allpaths)
+  {
+    allVertexPathsVector.push_back(it);
+  }
 
   int res = extendpaths(allpaths, isForward);
   logVerbose("Number of paths after extension step - " + std::to_string(res));
-  for (auto it : allpaths)
-  {
-	  allVertexPathsVector.push_back(it);
-  }
   return res;
 }
 
@@ -566,7 +569,12 @@ std::unordered_map<std::string, SGWalkVector> getAllPathsWithVertex(SGWalkVector
 	return vertexPathMap;
 }
 
-
+bool goesForward(Vertex* v, Edge* e)
+{
+  Edge* e2 = v->findEdgesTo(e->getEndID())[0];
+  int temp = e2->getMatchCoord().interval.start;
+  return !(e2->getMatchCoord().interval.start == 0);
+}
 
 std::pair<SGWalkVector, SGWalkVector> getPathsSplittedByVertex(SGWalkVector& paths, Vertex* v)
 {
@@ -580,15 +588,21 @@ std::pair<SGWalkVector, SGWalkVector> getPathsSplittedByVertex(SGWalkVector& pat
 		EdgePtrVec edges = it.getEdgeIndex();
 		EdgePtrVec edges1(edges.begin(), edges.begin()+index);
 		EdgePtrVec edges2(edges.begin() + index, edges.end());
-		if (edges1.size() != 0)
+		if (edges1.size() > 1)
 		{
-			SGWalk path1(edges1);
-			pathsSplittedByVertex.first.push_back(path1);
+  			SGWalk path1(edges1);
+        if (!goesForward(v, edges1[edges1.size() - 1]->getTwin()))
+        {
+          pathsSplittedByVertex.first.push_back(path1);
+        }
 		}
-		if (edges2.size() != 0)
+		if (edges2.size() > 1)
 		{
 			SGWalk path2(edges2);
-			pathsSplittedByVertex.second.push_back(path2);
+      if (goesForward(v, edges2[0]))
+      {
+        pathsSplittedByVertex.second.push_back(path2);
+      }
 		}
 	}
 	return pathsSplittedByVertex;
@@ -596,21 +610,36 @@ std::pair<SGWalkVector, SGWalkVector> getPathsSplittedByVertex(SGWalkVector& pat
 
 void reversePaths(SGWalkVector& paths)
 {
+  SGWalkVector newPaths;
 	for (auto it : paths)
 	{
-		EdgePtrVec temp=it.getEdgeIndex();
+		EdgePtrVec temp =it.getEdgeIndex();
+    EdgePtrVec temp2;
 		std::reverse(temp.begin(), temp.end());
 		for (auto it2 : temp)
 		{
-			it2 = it2->getTwin();
+			temp2.push_back(it2->getTwin());
 		}
-		it = SGWalk(temp);
+		newPaths.push_back(SGWalk(temp2));
 	}
+  paths = newPaths;
+}
+
+bool isPathInTheGraph(SGWalk& walk)
+{
+  auto vertices = walk.getVertices();
+  for (int i = 0; i < vertices.size() - 1; ++i)
+  {
+    auto edges = vertices[i]->findEdgesTo(vertices[i+1]->getID());
+    if (edges.size() == 0)
+      return false;
+  }
+  return true;
 }
 
 int EstimateByNeighbours(Vertex* v)
 {
-	std::cout << v->getID() << " is processed by neighbours";
+	std::cout << v->getID() << " is processed by neighbours" << std::endl;
 	std::unordered_map<std::string, SGWalkVector> allPathsWithVertexMap;
 	SGWalkVector allPathsWithVertex;
 	std::pair<SGWalkVector, SGWalkVector> pathsSplittedByVertex;
@@ -620,8 +649,26 @@ int EstimateByNeighbours(Vertex* v)
 	SGWalkVector pathsSplittedByVertexWithout2=removeContained(pathsSplittedByVertex.second);
 	reversePaths(pathsSplittedByVertex.first);
 	SGWalkVector pathsSplittedByVertexWithout1=removeContained(pathsSplittedByVertex.first);
-	int cn=std::max(extendpaths(pathsSplittedByVertexWithout1, false),	extendpaths(pathsSplittedByVertexWithout2, true));
-	return cn;
+
+
+  for (auto p : pathsSplittedByVertexWithout1)
+  {
+
+    if(!isPathInTheGraph(p))
+      std::cout << "!!!";
+  }
+  for (auto p : pathsSplittedByVertexWithout2)
+  {
+    if (!isPathInTheGraph(p))
+    std::cout << "???";
+
+  }
+
+  //	int cn=std::min(extendpaths(pathsSplittedByVertexWithout1, false),	extendpaths(pathsSplittedByVertexWithout2, true));
+  int cn=std::max(pathsSplittedByVertexWithout1.size(),	pathsSplittedByVertexWithout2.size());
+
+
+  return cn;
 }
 
 //
@@ -677,6 +724,8 @@ int main_work(int argc, char* argv[])
     std::string idname = d->getID();
     if (d->getSeqLen() > 10000)
     {
+      uncontainedpaths_SGA(graph->getVertex(d->getID()), forwardScaf[d->getID()], true, graph);
+      uncontainedpaths_SGA(graph->getVertex(d->getID()), reverseScaf[d->getID()], false, graph);
       continue;
     }
 
@@ -725,11 +774,12 @@ int main_work(int argc, char* argv[])
     {
       continue;
     }
-
-	if (!d->getEstimatedWithPairedReads() && d->getEstimatedCN() < EstimateByNeighbours(d))
+ 
+	if (!d->getSeqLen() < 150 && d->getEstimatedCN() < EstimateByNeighbours(d))
     {
-	  logVerbose(d->getID() + " is changed on " + std::to_string(EstimateByNeighbours(d)) + " by neighbours");
-	  d->setEstimatedCN(EstimateByNeighbours(d));
+    int cn = EstimateByNeighbours(d);
+	  logVerbose(d->getID() + " is changed on " + std::to_string(cn) + " by neighbours");
+	  d->setEstimatedCN(cn);
     }
   }
 
