@@ -580,7 +580,7 @@ std::pair<SGWalkVector, SGWalkVector> getPathsSplittedByVertex(SGWalkVector& pat
 		index = it.getVertexIndex(v->getID());
 		EdgePtrVec edges = it.getEdgeIndex();
 		EdgePtrVec edges1(edges.begin(), edges.begin()+index);
-		EdgePtrVec edges2(edges.begin() + index, edges.end());
+		EdgePtrVec edges2(edges.begin() + index-1, edges.end());
 		if (edges1.size() != 0)
 		{
 			SGWalk path1(edges1);
