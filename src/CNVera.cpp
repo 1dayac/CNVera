@@ -206,7 +206,7 @@ typedef std::vector<blastRecord> blastVector;
 
 void parseBlastFile(blastVector& blastMap, StringGraph* graph)
 {
-  std::ifstream blastParse("results.txt");
+  std::ifstream blastParse("results_cn.txt");
   std::string temp;
   while (getline(blastParse, temp))
   {
@@ -688,8 +688,8 @@ int main_work(int argc, char* argv[])
   std::string contigsFilename = argv[6];
   std::string makeblastdbCommand = "$SHELL -c 'makeblastdb -dbtype nucl -in " + referenceFilename + " -out tempDatabase'";
   //make blast database for reference
-  /*int excode = system(makeblastdbCommand.c_str());
-  std::string blastContigsCommand = "$SHELL -c 'blastn -db tempDatabase -query " + contigsFilename + " -outfmt 6 -dust yes -word_size 80 -evalue 10 -perc_identity 95 -out results.txt'";
+  int excode = system(makeblastdbCommand.c_str());
+  std::string blastContigsCommand = "$SHELL -c 'blastn -db tempDatabase -query " + contigsFilename + " -outfmt 6 -dust yes -word_size 80 -evalue 10 -perc_identity 95 -out results_cn.txt'";
   system(blastContigsCommand.c_str());
 
   if (excode)
@@ -697,7 +697,7 @@ int main_work(int argc, char* argv[])
     std::cerr << "Error making blast db" << std::endl;
     return 1;
   }
-*/
+
   //contruct adjacency lists
   StringGraph* graph = SGUtil::loadASQG(filename, 0);
   blastVector blastOfAllContigs;
